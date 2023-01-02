@@ -13,11 +13,17 @@ class VozSpider(scrapy.Spider):
             yield scrapy.Request(url=url, callback=self.parse)
 
     def parse(self, response):
-        results = response.css('article.message-body').getall()
+        # results = response.css('article.message-body div.bbWrapper').getall()
+        commentSelectors = response.css('article.message-body')
         
         filename = f'result.html'
+
+        # handle bad case
         with open(filename, 'w') as f:
-            for x in results: 
-                f.write(str(x))
+            for selector in commentSelectors:
+                stripped = filter(lambda s: s != '\n', selector.css('div.bbWrapper *::text').getall()) 
+                text = '\n'.join(stripped)
+                f.write(text)
+                f.write("\n=====================================================================\n")
             f.close()
             
